@@ -101,8 +101,8 @@ function Dashboard() {
           <p className="text-xs text-muted-foreground">Live monitoring · Left forearm</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {typeof Notification !== "undefined" && (
-            <button onClick={() => Notification.requestPermission()} className="rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-semibold hover:border-primary">Enable notifications</button>
+          {(
+            <button onClick={() => typeof Notification !== "undefined" && Notification.requestPermission()} className="rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-semibold hover:border-primary">Enable notifications</button>
           )}
           {(["normal", "moderate", "high"] as const).map((m) => (
             <button key={m} onClick={() => setMode(m)}
