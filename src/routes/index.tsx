@@ -31,10 +31,10 @@ const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 const now = () => new Date().toLocaleTimeString("en-GB");
 
 const patient = {
-  name: "Ahmed Al-Harbi", id: "A-1042", age: 58, sex: "Male", blood: "O+", weight: "82 kg",
-  ward: "Vascular Surgery · Bed 12", procedure: "Left radial artery graft (post-op day 1)",
-  doctor: "Dr. Sara Al-Qahtani", allergies: "Penicillin", conditions: "Type 2 diabetes, Hypertension",
-  meds: "Heparin, Metformin, Amlodipine", admitted: "2 Oct 2026",
+  name: "Ahmed Al-Harbi", id: "A-1042", age: 34, sex: "Male", blood: "O+", weight: "82 kg",
+  ward: "Orthopedic Surgery · Bed 12", procedure: "Left tibial shaft fracture — IM nail fixation (post-op day 1)",
+  doctor: "Dr. Sara Al-Qahtani", allergies: "Penicillin", conditions: "High ACS risk — tibial shaft fracture",
+  meds: "Enoxaparin, Cefazolin, Morphine PCA", admitted: "2 Oct 2026",
 };
 
 function Dashboard() {
@@ -64,7 +64,7 @@ function Dashboard() {
       if (tick.current++ % 5 === 0) setLog((l) => [r, ...l].slice(0, 200));
       const lvl = levelOf(score);
       if (lvl !== "Low" && lvl !== lastLevel.current) {
-        const a: Alert = { id: Date.now(), time: r.t, level: lvl, score, msg: lvl === "High" ? "High risk — intervention required now" : "Moderate risk — re-check the limb" };
+        const a: Alert = { id: Date.now(), time: r.t, level: lvl, score, msg: lvl === "High" ? "Possible acute compartment syndrome — intervene now" : "Compromised limb perfusion — re-check the leg" };
         setAlerts((x) => [a, ...x].slice(0, 50));
         setToast(a);
         if (typeof Notification !== "undefined" && Notification.permission === "granted") {
@@ -98,7 +98,7 @@ function Dashboard() {
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
         <div>
           <h1 className="text-lg font-bold tracking-tight">Vascular Alert <span className="text-primary">Smart Sleeve</span></h1>
-          <p className="text-xs text-muted-foreground">Live monitoring · Left forearm</p>
+          <p className="text-xs text-muted-foreground">ACS monitoring · Left lower leg (tibial shaft fracture)</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {(
@@ -223,12 +223,13 @@ function Dashboard() {
 
         {/* How it works */}
         <section className="rounded-2xl border border-border bg-card p-5 lg:col-span-2">
-          <h2 className="text-sm font-semibold">How the scale and sensor work</h2>
+          <h2 className="text-sm font-semibold">How the scale and sensor work <span className="font-normal text-muted-foreground">· ACS detection after tibial shaft fracture</span></h2>
+          <p className="mt-2 text-sm text-muted-foreground">Tibial shaft fractures carry the highest risk of acute compartment syndrome (ACS). The sleeve tracks oxygen, blood flow and skin temperature in the injured leg — a falling score warns the team before classic symptoms appear.</p>
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             {[
-              { l: "Low" as Level, r: "0–2", d: "Normal blood flow. No notification sent." },
-              { l: "Moderate" as Level, r: "3–6", d: "Flow is dropping. Notification sent — re-check the limb." },
-              { l: "High" as Level, r: "7–8", d: "Likely vascular compromise. Notification sent — intervention required." },
+              { l: "Low" as Level, r: "0–2", d: "Normal limb perfusion after tibial fracture. No notification sent." },
+              { l: "Moderate" as Level, r: "3–6", d: "Perfusion is dropping — early ACS sign. Notification sent — re-check the leg." },
+              { l: "High" as Level, r: "7–8", d: "Likely acute compartment syndrome. Notification sent — intervention required." },
             ].map((x) => (
               <div key={x.l} className={`rounded-xl border p-4 border-${tone(x.l)}/50`}>
                 <p className={`font-semibold text-${tone(x.l)}`}>{x.l} <span className="font-mono">· {x.r}</span></p>
