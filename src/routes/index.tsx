@@ -1,3 +1,4 @@
+// tailwind safelist: text-success text-warning text-destructive bg-success bg-warning bg-destructive bg-success/15 bg-warning/15 bg-destructive/15 border-success/50 border-warning/50 border-destructive/50
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, ReferenceLine } from "recharts";
