@@ -90,7 +90,7 @@ function Dashboard() {
     <div className="min-h-screen bg-background font-sans text-foreground">
       {toast && (
         <div className={`fixed inset-x-3 top-3 z-50 mx-auto max-w-md rounded-xl border p-4 shadow-lg bg-card border-${tone(toast.level)}/50`}>
-          <p className={`text-sm font-bold text-${tone(toast.level)}`}>🔔 {toast.level} · {toast.score}/8</p>
+          <p className={`text-sm font-bold text-${tone(toast.level)}`}>{toast.level} · {toast.score}/8</p>
           <p className="text-sm">{toast.msg}</p>
         </div>
       )}
