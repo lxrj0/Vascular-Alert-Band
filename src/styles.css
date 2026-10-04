@@ -44,6 +44,10 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-vital-hr: var(--vital-hr);
+  --color-vital-spo2: var(--vital-spo2);
+  --color-vital-perf: var(--vital-perf);
+  --color-vital-temp: var(--vital-temp);
   --font-sans: 'IBM Plex Sans', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
   --color-border: var(--border);
@@ -85,6 +89,10 @@
   --destructive-foreground: oklch(0.98 0 0);
   --success: oklch(0.75 0.17 150);
   --warning: oklch(0.8 0.16 75);
+  --vital-hr: oklch(0.72 0.19 15);
+  --vital-spo2: oklch(0.78 0.12 235);
+  --vital-perf: oklch(0.72 0.18 300);
+  --vital-temp: oklch(0.82 0.15 60);
   --border: oklch(0.32 0.03 240);
   --input: oklch(0.32 0.03 240);
   --ring: oklch(0.78 0.14 190);
