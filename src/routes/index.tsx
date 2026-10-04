@@ -1,4 +1,4 @@
-// tailwind safelist: text-success text-warning text-destructive bg-success bg-warning bg-destructive bg-success/15 bg-warning/15 bg-destructive/15 border-success/50 border-warning/50 border-destructive/50
+// tailwind safelist: text-success text-warning text-destructive bg-success bg-warning bg-destructive bg-success/15 bg-warning/15 bg-destructive/15 border-success/50 border-warning/50 border-destructive/50 border-success/40 border-warning/40 border-destructive/40 bg-success/10 bg-warning/10 bg-destructive/10 text-success/80 text-warning/80 text-destructive/80 bg-success/20 bg-warning/20 bg-destructive/20 hover:bg-success/20 hover:bg-warning/20 hover:bg-destructive/20
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, ReferenceLine } from "recharts";
@@ -87,9 +87,11 @@ function Dashboard() {
   const tn = tone(level);
 
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground">
+    <div className="relative min-h-screen overflow-x-clip bg-background font-sans text-foreground">
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-80 bg-[radial-gradient(60%_100%_at_18%_0%,color-mix(in_oklab,var(--primary)_16%,transparent),transparent)]" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-80 bg-[radial-gradient(50%_100%_at_82%_0%,color-mix(in_oklab,var(--vital-perf)_14%,transparent),transparent)]" />
       {toast && (
-        <div className={`fixed inset-x-3 top-3 z-50 mx-auto max-w-md rounded-xl border p-4 shadow-lg bg-card border-${tone(toast.level)}/50`}>
+        <div className={`fixed inset-x-3 top-3 z-50 mx-auto max-w-md rounded-xl border p-4 shadow-lg bg-card border-${tone(toast.level)}/50`} style={{ boxShadow: `0 10px 44px -8px color-mix(in oklab, var(--${tone(toast.level)}) 50%, transparent)` }}>
           <p className={`text-sm font-bold text-${tone(toast.level)}`}>{toast.level} · {toast.score}/8</p>
           <p className="text-sm">{toast.msg}</p>
         </div>
@@ -97,19 +99,20 @@ function Dashboard() {
 
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
         <div>
-          <h1 className="text-lg font-bold tracking-tight">Vascular Alert <span className="text-primary">Smart Sleeve</span></h1>
+          <h1 className="text-lg font-bold tracking-tight">Vascular Alert <span className="bg-gradient-to-r from-primary via-vital-spo2 to-vital-perf bg-clip-text text-transparent">Smart Sleeve</span></h1>
           <p className="text-xs text-muted-foreground">ACS monitoring · Left lower leg (tibial shaft fracture)</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {(
-            <button onClick={() => typeof Notification !== "undefined" && Notification.requestPermission()} className="rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-semibold hover:border-primary">Enable notifications</button>
-          )}
-          {(["normal", "moderate", "high"] as const).map((m) => (
-            <button key={m} onClick={() => setMode(m)}
-              className={`rounded-lg border px-3 py-2 text-xs font-semibold capitalize ${mode === m ? "border-primary bg-primary/15 text-primary" : "border-border bg-secondary hover:border-primary"}`}>
-              Simulate {m}
-            </button>
-          ))}
+          <button onClick={() => typeof Notification !== "undefined" && Notification.requestPermission()} className="rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-semibold hover:border-primary">Enable notifications</button>
+          {(["normal", "moderate", "high"] as const).map((m) => {
+            const t = m === "normal" ? "success" : m === "moderate" ? "warning" : "destructive";
+            return (
+              <button key={m} onClick={() => setMode(m)}
+                className={`rounded-lg border px-3 py-2 text-xs font-semibold capitalize transition-colors ${mode === m ? `border-${t} bg-${t}/15 text-${t}` : `border-${t}/40 bg-${t}/10 text-${t}/80 hover:bg-${t}/20`}`}>
+                Simulate {m}
+              </button>
+            );
+          })}
         </div>
       </header>
 
@@ -117,17 +120,17 @@ function Dashboard() {
         {/* Patient */}
         <section className="rounded-2xl border border-border bg-card p-5 lg:row-span-2">
           <div className="flex items-center gap-3">
-            <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/15 font-bold text-primary">AH</div>
+            <div className="grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-primary to-vital-perf font-bold text-primary-foreground shadow-lg shadow-primary/25">AH</div>
             <div>
               <p className="font-semibold">{patient.name}</p>
               <p className="text-xs text-muted-foreground">#{patient.id} · {patient.age} y · {patient.sex}</p>
             </div>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <Vital label="Heart rate" value={`${last.hr}`} unit="bpm" />
-            <Vital label="SpO2" value={`${last.spo2}`} unit="%" />
-            <Vital label="Perfusion" value={`${last.pi}`} unit="%" />
-            <Vital label="Skin temp" value={`${last.temp}`} unit="°C" />
+            <Vital label="Heart rate" value={`${last.hr}`} unit="bpm" color="vital-hr" />
+            <Vital label="SpO2" value={`${last.spo2}`} unit="%" color="vital-spo2" />
+            <Vital label="Perfusion" value={`${last.pi}`} unit="%" color="vital-perf" />
+            <Vital label="Skin temp" value={`${last.temp}`} unit="°C" color="vital-temp" />
           </div>
           <dl className="mt-4 space-y-2 text-sm">
             {[
@@ -144,10 +147,11 @@ function Dashboard() {
 
         {/* Score + sensors */}
         <section className="grid gap-4 md:grid-cols-[1.2fr_1fr_1fr_1fr]">
-          <div className={`rounded-2xl border bg-card p-5 border-${tn}/50`}>
+          <div className={`relative overflow-hidden rounded-2xl border bg-card p-5 border-${tn}/50`}>
+            <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-25 blur-2xl" style={{ background: `var(--${tn})` }} />
             <p className="text-xs uppercase tracking-widest text-muted-foreground">Risk Score</p>
             <div className="mt-2 flex items-end gap-2">
-              <span className={`font-mono text-6xl font-semibold text-${tn}`}>{last.score}</span>
+              <span className={`font-mono text-6xl font-semibold text-${tn}`} style={{ textShadow: `0 0 28px color-mix(in oklab, var(--${tn}) 60%, transparent)` }}>{last.score}</span>
               <span className="mb-2 font-mono text-muted-foreground">/ 8</span>
             </div>
             <div className="mt-3 flex gap-1">
@@ -160,19 +164,19 @@ function Dashboard() {
             </div>
             <p className="mt-2 text-xs text-muted-foreground">{action(level)}</p>
           </div>
-          <Sensor label="SpO2" unit="%" value={last.spo2} pts={scoreSpo2(last.spo2)} max={3} />
-          <Sensor label="Perfusion" unit="%" value={last.pi} pts={scorePi(last.pi)} max={3} />
-          <Sensor label="Temperature" unit="°C" value={last.temp} pts={scoreTemp(last.temp)} max={2} />
+          <Sensor label="SpO2" unit="%" value={last.spo2} pts={scoreSpo2(last.spo2)} max={3} color="vital-spo2" />
+          <Sensor label="Perfusion" unit="%" value={last.pi} pts={scorePi(last.pi)} max={3} color="vital-perf" />
+          <Sensor label="Temperature" unit="°C" value={last.temp} pts={scoreTemp(last.temp)} max={2} color="vital-temp" />
         </section>
 
         {/* Trends */}
         <section className="rounded-2xl border border-border bg-card p-5">
           <h2 className="mb-3 text-sm font-semibold">Trends · last 2 min</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            <Chart title="Risk Score (0–8)" data={data} k="score" color="var(--chart-5)" domain={[0, 8]} refs={[3, 7]} />
-            <Chart title="SpO2 (%)" data={data} k="spo2" color="var(--chart-1)" domain={[70, 100]} />
-            <Chart title="Perfusion Index (%)" data={data} k="pi" color="var(--chart-2)" domain={[0, 5]} />
-            <Chart title="Temperature (°C)" data={data} k="temp" color="var(--chart-3)" domain={[25, 37]} />
+            <Chart title="Risk Score (0–8)" data={data} k="score" colors={["var(--warning)", "var(--destructive)"]} domain={[0, 8]} refs={[3, 7]} />
+            <Chart title="SpO2 (%)" data={data} k="spo2" colors={["var(--primary)", "var(--vital-spo2)"]} domain={[70, 100]} />
+            <Chart title="Perfusion Index (%)" data={data} k="pi" colors={["var(--success)", "var(--vital-perf)"]} domain={[0, 5]} />
+            <Chart title="Temperature (°C)" data={data} k="temp" colors={["var(--chart-3)", "var(--vital-temp)"]} domain={[25, 37]} />
           </div>
         </section>
 
@@ -187,7 +191,7 @@ function Dashboard() {
           ) : (
             <ul className="divide-y divide-border">
               {alerts.map((a) => (
-                <li key={a.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
+                <li key={a.id} className="flex flex-wrap items-center gap-3 border-l-2 py-2 pl-3 text-sm" style={{ borderColor: `var(--${tone(a.level)})` }}>
                   <span className={`rounded px-2 py-0.5 text-xs font-semibold bg-${tone(a.level)}/15 text-${tone(a.level)}`}>{a.level}</span>
                   <span className="font-mono text-muted-foreground">{a.time}</span>
                   <span className="flex-1">{a.msg}</span>
@@ -268,39 +272,49 @@ function Dashboard() {
   );
 }
 
-function Vital({ label, value, unit }: { label: string; value: string; unit: string }) {
+function Vital({ label, value, unit, color }: { label: string; value: string; unit: string; color: string }) {
   return (
-    <div className="rounded-xl bg-secondary p-3">
+    <div className="rounded-xl bg-secondary p-3" style={{ boxShadow: `inset 3px 0 0 0 var(--${color})` }}>
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="font-mono text-xl font-semibold">{value}<span className="ml-1 text-xs text-muted-foreground">{unit}</span></p>
+      <p className="font-mono text-xl font-semibold" style={{ color: `var(--${color})` }}>{value}<span className="ml-1 text-xs text-muted-foreground">{unit}</span></p>
     </div>
   );
 }
 
-function Sensor({ label, unit, value, pts, max }: { label: string; unit: string; value: number; pts: number; max: number }) {
+function Sensor({ label, unit, value, pts, max, color }: { label: string; unit: string; value: number; pts: number; max: number; color: string }) {
   const l = pts === 0 ? "success" : pts === max ? "destructive" : "warning";
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div className="rounded-2xl border border-border border-t-2 bg-card p-5" style={{ borderTopColor: `var(--${color})` }}>
       <p className="text-xs uppercase tracking-widest text-muted-foreground">{label}</p>
-      <p className="mt-3 font-mono text-3xl font-semibold">{value}<span className="ml-1 text-base text-muted-foreground">{unit}</span></p>
-      <p className={`mt-3 text-xs font-semibold text-${l}`}>+{pts} / {max} pts</p>
+      <p className="mt-3 font-mono text-3xl font-semibold" style={{ color: `var(--${color})` }}>{value}<span className="ml-1 text-base text-muted-foreground">{unit}</span></p>
+      <p className={`mt-3 inline-block rounded-full px-2 py-0.5 text-xs font-semibold bg-${l}/15 text-${l}`}>+{pts} / {max} pts</p>
     </div>
   );
 }
 
-function Chart({ title, data, k, color, domain, refs = [] }: { title: string; data: Reading[]; k: keyof Reading; color: string; domain: [number, number]; refs?: number[] }) {
+function Chart({ title, data, k, colors, domain, refs = [] }: { title: string; data: Reading[]; k: keyof Reading; colors: [string, string]; domain: [number, number]; refs?: number[] }) {
+  const id = `grad-${k}`;
   return (
     <div>
-      <p className="mb-1 text-xs text-muted-foreground">{title}</p>
+      <p className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+        <span className="h-1.5 w-1.5 rounded-full" style={{ background: `linear-gradient(90deg, ${colors[0]}, ${colors[1]})` }} />
+        {title}
+      </p>
       <div className="h-40">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
+            <defs>
+              <linearGradient id={id} x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor={colors[0]} />
+                <stop offset="100%" stopColor={colors[1]} />
+              </linearGradient>
+            </defs>
             <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
             <XAxis dataKey="t" hide />
             <YAxis domain={domain} width={30} tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} />
             <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", fontSize: 12 }} />
             {refs.map((r) => <ReferenceLine key={r} y={r} stroke="var(--warning)" strokeDasharray="4 4" />)}
-            <Line type="monotone" dataKey={k} stroke={color} strokeWidth={2} dot={false} isAnimationActive={false} />
+            <Line type="monotone" dataKey={k} stroke={`url(#${id})`} strokeWidth={2.5} dot={false} isAnimationActive={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
