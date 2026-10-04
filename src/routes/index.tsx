@@ -281,30 +281,40 @@ function Vital({ label, value, unit, color }: { label: string; value: string; un
   );
 }
 
-function Sensor({ label, unit, value, pts, max }: { label: string; unit: string; value: number; pts: number; max: number }) {
+function Sensor({ label, unit, value, pts, max, color }: { label: string; unit: string; value: number; pts: number; max: number; color: string }) {
   const l = pts === 0 ? "success" : pts === max ? "destructive" : "warning";
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div className="rounded-2xl border border-border border-t-2 bg-card p-5" style={{ borderTopColor: `var(--${color})` }}>
       <p className="text-xs uppercase tracking-widest text-muted-foreground">{label}</p>
-      <p className="mt-3 font-mono text-3xl font-semibold">{value}<span className="ml-1 text-base text-muted-foreground">{unit}</span></p>
-      <p className={`mt-3 text-xs font-semibold text-${l}`}>+{pts} / {max} pts</p>
+      <p className="mt-3 font-mono text-3xl font-semibold" style={{ color: `var(--${color})` }}>{value}<span className="ml-1 text-base text-muted-foreground">{unit}</span></p>
+      <p className={`mt-3 inline-block rounded-full px-2 py-0.5 text-xs font-semibold bg-${l}/15 text-${l}`}>+{pts} / {max} pts</p>
     </div>
   );
 }
 
-function Chart({ title, data, k, color, domain, refs = [] }: { title: string; data: Reading[]; k: keyof Reading; color: string; domain: [number, number]; refs?: number[] }) {
+function Chart({ title, data, k, colors, domain, refs = [] }: { title: string; data: Reading[]; k: keyof Reading; colors: [string, string]; domain: [number, number]; refs?: number[] }) {
+  const id = `grad-${k}`;
   return (
     <div>
-      <p className="mb-1 text-xs text-muted-foreground">{title}</p>
+      <p className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+        <span className="h-1.5 w-1.5 rounded-full" style={{ background: `linear-gradient(90deg, ${colors[0]}, ${colors[1]})` }} />
+        {title}
+      </p>
       <div className="h-40">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
+            <defs>
+              <linearGradient id={id} x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor={colors[0]} />
+                <stop offset="100%" stopColor={colors[1]} />
+              </linearGradient>
+            </defs>
             <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
             <XAxis dataKey="t" hide />
             <YAxis domain={domain} width={30} tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} />
             <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", fontSize: 12 }} />
             {refs.map((r) => <ReferenceLine key={r} y={r} stroke="var(--warning)" strokeDasharray="4 4" />)}
-            <Line type="monotone" dataKey={k} stroke={color} strokeWidth={2} dot={false} isAnimationActive={false} />
+            <Line type="monotone" dataKey={k} stroke={`url(#${id})`} strokeWidth={2.5} dot={false} isAnimationActive={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
