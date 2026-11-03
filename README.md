@@ -1,26 +1,64 @@
-# Vital Sleeve Monitor
+Smart Vascular Alert 🩺
 
-ابغاك تسوي لي داش بورد لvascular alert smart sleeve يسوي detection لثلاث حساسات Spo2, perfusion, temperature والscale حقه من 8-0 ويكون فيه هيستور ويسوي اليرت نفس ذا تقريبا
+Smart Monitoring for Early Detection of Acute Compartment Syndrome (ACS)
 
-This project was built with [Lovable](https://lovable.dev).
+Overview
 
-**Live app**: https://sleeve-alert-buddy.lovable.app
+Smart Vascular Alert is a healthcare technology prototype designed to support early risk identification of Acute Compartment Syndrome (ACS) in patients with tibial shaft fractures.
 
-## Build with Lovable
+The system monitors selected physiological indicators and analyzes changes to provide visual risk classification and alerts.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/26ead4a6-8be4-4db8-86f9-d58c5d5f6438).
+The Problem
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+Acute Compartment Syndrome is a serious orthopedic emergency. Delayed recognition can lead to severe complications, including permanent tissue damage.
 
-## Development
+Our Solution
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+A smart monitoring system that combines sensor-based data collection, risk assessment, and a visual dashboard to support clinical awareness.
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
+Monitored Parameters
+
+* Oxygen Saturation (SpO₂)
+* Perfusion
+* Temperature
+* Movement
+
+Risk Classification
+
+Risk Level	Score	Indicator
+Low	0–2	Green
+Moderate	3–5	Yellow
+High	6–8	Red
+
+System Architecture
+
+Sensor → API → Database → Risk Assessment Algorithm → Dashboard → Alert
+
+Key Features
+
+* Physiological parameter monitoring
+* Baseline-based data comparison
+* Risk scoring and classification
+* Visual monitoring dashboard
+* Alert notification system
+
+Live Demo
+
+Try Smart Vascular Alert
+
+Development Platform
+
+* Lovable
+* GitHub
+
+Project Status
+
+Prototype / Minimum Viable Product (MVP)
+
+Clinical Disclaimer
+
+This project is an educational prototype and has not been clinically validated. It is not intended to replace professional clinical assessment or medical decision-making.
+
+Team
+
+Smart Vascular Alert Team
