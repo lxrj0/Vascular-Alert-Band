@@ -25,7 +25,7 @@ export const TEMP_BASELINE = 37.5;
 export const RISK_THRESHOLDS = {
   spo2: { normalMin: 95, warningMin: 90, highMin: 85 },
   perfusion: { normalMin: 1, warningMin: 0.5, highMin: 0.3 },
-  temperature: { normalMaxDeviation: 0.5, warningMaxDeviation: 1.5 },
+  temperature: { normalMaxRise: 0.5, warningMaxRise: 1.5 },
   levels: { moderateMin: 3, highMin: 7 },
 } as const;
 
@@ -40,7 +40,7 @@ export const scorePi = (v: number) => {
 export const temperatureRisk = (temp: number) => {
   const rise = Math.max(0, temp - TEMP_BASELINE);
   const t = RISK_THRESHOLDS.temperature;
-  const points = rise <= t.normalMaxDeviation ? 0 : rise <= t.warningMaxDeviation ? 1 : 2;
+  const points = rise <= t.normalMaxRise ? 0 : rise <= t.warningMaxRise ? 1 : 2;
   return {
     rise,
     points,
@@ -288,7 +288,7 @@ function Dashboard() {
               <tbody className="font-mono">
                 <tr className="border-t border-border"><td className="py-2 font-sans">SpO2</td><td>≥{RISK_THRESHOLDS.spo2.normalMin}%</td><td>{RISK_THRESHOLDS.spo2.warningMin}–{RISK_THRESHOLDS.spo2.normalMin - 1}</td><td>{RISK_THRESHOLDS.spo2.highMin}–{RISK_THRESHOLDS.spo2.warningMin - 1}</td><td>&lt;{RISK_THRESHOLDS.spo2.highMin}</td></tr>
                 <tr className="border-t border-border"><td className="py-2 font-sans">Perfusion index</td><td>≥{RISK_THRESHOLDS.perfusion.normalMin.toFixed(1)}%</td><td>{RISK_THRESHOLDS.perfusion.warningMin}–0.99</td><td>{RISK_THRESHOLDS.perfusion.highMin}–0.49</td><td>&lt;{RISK_THRESHOLDS.perfusion.highMin}</td></tr>
-                <tr className="border-t border-border"><td className="py-2 font-sans">Temperature deviation</td><td>Δ ≤ {RISK_THRESHOLDS.temperature.normalMaxDeviation}°C</td><td>{RISK_THRESHOLDS.temperature.normalMaxDeviation} &lt; Δ ≤ {RISK_THRESHOLDS.temperature.warningMaxDeviation}°C</td><td>Δ &gt; {RISK_THRESHOLDS.temperature.warningMaxDeviation}°C</td><td>—</td></tr>
+                <tr className="border-t border-border"><td className="py-2 font-sans">Temperature deviation</td><td>Δ ≤ {RISK_THRESHOLDS.temperature.normalMaxRise}°C</td><td>{RISK_THRESHOLDS.temperature.normalMaxRise} &lt; Δ ≤ {RISK_THRESHOLDS.temperature.warningMaxRise}°C</td><td>Δ &gt; {RISK_THRESHOLDS.temperature.warningMaxRise}°C</td><td>—</td></tr>
               </tbody>
             </table>
           </div>
