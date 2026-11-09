@@ -21,10 +21,38 @@ type Level = "Low" | "Moderate" | "High";
 type Reading = { t: string; spo2: number; pi: number; temp: number; hr: number; score: number };
 type Alert = { id: number; time: string; level: Level; score: number; msg: string };
 
-const scoreSpo2 = (v: number) => (v >= 95 ? 0 : v >= 90 ? 1 : v >= 85 ? 2 : 3);
-const scorePi = (v: number) => (v >= 1 ? 0 : v >= 0.5 ? 1 : v >= 0.3 ? 2 : 3);
-const scoreTemp = (v: number) => (v >= 32 ? 0 : v >= 30 ? 1 : 2);
-const levelOf = (s: number): Level => (s >= 7 ? "High" : s >= 3 ? "Moderate" : "Low");
+export const TEMP_BASELINE = 37.5;
+export const RISK_THRESHOLDS = {
+  spo2: { normalMin: 95, warningMin: 90, highMin: 85 },
+  perfusion: { normalMin: 1, warningMin: 0.5, highMin: 0.3 },
+  temperature: { normalMaxDeviation: 0.5, warningMaxDeviation: 1.5 },
+  levels: { moderateMin: 3, highMin: 7 },
+} as const;
+
+export const scoreSpo2 = (v: number) => {
+  const t = RISK_THRESHOLDS.spo2;
+  return v >= t.normalMin ? 0 : v >= t.warningMin ? 1 : v >= t.highMin ? 2 : 3;
+};
+export const scorePi = (v: number) => {
+  const t = RISK_THRESHOLDS.perfusion;
+  return v >= t.normalMin ? 0 : v >= t.warningMin ? 1 : v >= t.highMin ? 2 : 3;
+};
+export const temperatureRisk = (temp: number) => {
+  const deviation = Math.abs(temp - TEMP_BASELINE);
+  const t = RISK_THRESHOLDS.temperature;
+  const points = deviation <= t.normalMaxDeviation ? 0 : deviation <= t.warningMaxDeviation ? 1 : 2;
+  return {
+    deviation,
+    points,
+    label: points === 0 ? "Normal" : points === 1 ? "Warning" : "High risk",
+    tone: points === 0 ? "success" : points === 1 ? "warning" : "destructive",
+  };
+};
+export const scoreTemp = (temp: number) => temperatureRisk(temp).points;
+export const calculateRiskScore = ({ spo2, pi, temp }: Pick<Reading, "spo2" | "pi" | "temp">) =>
+  scoreSpo2(spo2) + scorePi(pi) + scoreTemp(temp);
+const levelOf = (s: number): Level =>
+  s >= RISK_THRESHOLDS.levels.highMin ? "High" : s >= RISK_THRESHOLDS.levels.moderateMin ? "Moderate" : "Low";
 const tone = (l: Level) => (l === "High" ? "destructive" : l === "Moderate" ? "warning" : "success");
 const action = (l: Level) => (l === "High" ? "Intervention required" : l === "Moderate" ? "Re-check required" : "No action");
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
