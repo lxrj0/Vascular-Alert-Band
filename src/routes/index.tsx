@@ -25,7 +25,7 @@ export const TEMP_BASELINE = 37.5;
 export const RISK_THRESHOLDS = {
   spo2: { normalMin: 95, warningMin: 90, highMin: 85 },
   perfusion: { normalMin: 1, warningMin: 0.5, highMin: 0.3 },
-  temperature: { normalMaxDeviation: 0.5, warningMaxDeviation: 1.5 },
+  temperature: { normalMaxRise: 0.5, warningMaxRise: 1.5 },
   levels: { moderateMin: 3, highMin: 7 },
 } as const;
 
@@ -38,11 +38,11 @@ export const scorePi = (v: number) => {
   return v >= t.normalMin ? 0 : v >= t.warningMin ? 1 : v >= t.highMin ? 2 : 3;
 };
 export const temperatureRisk = (temp: number) => {
-  const deviation = Math.abs(temp - TEMP_BASELINE);
+  const rise = Math.max(0, temp - TEMP_BASELINE);
   const t = RISK_THRESHOLDS.temperature;
-  const points = deviation <= t.normalMaxDeviation ? 0 : deviation <= t.warningMaxDeviation ? 1 : 2;
+  const points = rise <= t.normalMaxRise ? 0 : rise <= t.warningMaxRise ? 1 : 2;
   return {
-    deviation,
+    rise,
     points,
     label: points === 0 ? "Normal" : points === 1 ? "Warning" : "High risk",
     tone: points === 0 ? "success" : points === 1 ? "warning" : "destructive",
@@ -79,8 +79,8 @@ function Dashboard() {
     const id = setInterval(() => {
       const c = cur.current;
       const target =
-        mode === "high" ? { spo2: 82, pi: 0.2, temp: 35.5, hr: 112 }
-        : mode === "moderate" ? { spo2: 91, pi: 0.6, temp: 36.2, hr: 92 }
+        mode === "high" ? { spo2: 82, pi: 0.2, temp: 39.5, hr: 112 }
+        : mode === "moderate" ? { spo2: 91, pi: 0.6, temp: 38.7, hr: 92 }
         : { spo2: 97, pi: 2.5, temp: 37.2, hr: 76 };
       c.spo2 = clamp(c.spo2 + (target.spo2 - c.spo2) * 0.15 + (Math.random() - 0.5) * 1, 70, 100);
       c.pi = clamp(c.pi + (target.pi - c.pi) * 0.15 + (Math.random() - 0.5) * 0.15, 0.05, 5);
@@ -204,7 +204,7 @@ function Dashboard() {
             color="vital-temp"
             status={tempStatus.label}
             statusTone={tempStatus.tone}
-            detail={`Δ ${tempStatus.deviation.toFixed(1)}°C from ${TEMP_BASELINE}°C baseline`}
+            detail={`Rise ${tempStatus.rise.toFixed(1)}°C · baseline ${TEMP_BASELINE}°C`}
           />
         </section>
 
@@ -215,7 +215,7 @@ function Dashboard() {
             <Chart title="Risk Score (0–8)" data={data} k="score" colors={["var(--warning)", "var(--destructive)"]} domain={[0, 8]} refs={[RISK_THRESHOLDS.levels.moderateMin, RISK_THRESHOLDS.levels.highMin]} />
             <Chart title="SpO2 (%)" data={data} k="spo2" colors={["var(--primary)", "var(--vital-spo2)"]} domain={[70, 100]} />
             <Chart title="Perfusion Index (%)" data={data} k="pi" colors={["var(--success)", "var(--vital-perf)"]} domain={[0, 5]} />
-            <Chart title="Temperature (°C)" data={data} k="temp" colors={["var(--chart-3)", "var(--vital-temp)"]} domain={[34, 39]} />
+            <Chart title="Temperature (°C)" data={data} k="temp" colors={["var(--chart-3)", "var(--vital-temp)"]} domain={[35, 41]} />
           </div>
         </section>
 
@@ -288,14 +288,14 @@ function Dashboard() {
               <tbody className="font-mono">
                 <tr className="border-t border-border"><td className="py-2 font-sans">SpO2</td><td>≥{RISK_THRESHOLDS.spo2.normalMin}%</td><td>{RISK_THRESHOLDS.spo2.warningMin}–{RISK_THRESHOLDS.spo2.normalMin - 1}</td><td>{RISK_THRESHOLDS.spo2.highMin}–{RISK_THRESHOLDS.spo2.warningMin - 1}</td><td>&lt;{RISK_THRESHOLDS.spo2.highMin}</td></tr>
                 <tr className="border-t border-border"><td className="py-2 font-sans">Perfusion index</td><td>≥{RISK_THRESHOLDS.perfusion.normalMin.toFixed(1)}%</td><td>{RISK_THRESHOLDS.perfusion.warningMin}–0.99</td><td>{RISK_THRESHOLDS.perfusion.highMin}–0.49</td><td>&lt;{RISK_THRESHOLDS.perfusion.highMin}</td></tr>
-                <tr className="border-t border-border"><td className="py-2 font-sans">Temperature deviation</td><td>Δ ≤ {RISK_THRESHOLDS.temperature.normalMaxDeviation}°C</td><td>{RISK_THRESHOLDS.temperature.normalMaxDeviation} &lt; Δ ≤ {RISK_THRESHOLDS.temperature.warningMaxDeviation}°C</td><td>Δ &gt; {RISK_THRESHOLDS.temperature.warningMaxDeviation}°C</td><td>—</td></tr>
+                <tr className="border-t border-border"><td className="py-2 font-sans">Temperature rise</td><td>Rise ≤ {RISK_THRESHOLDS.temperature.normalMaxRise}°C</td><td>{RISK_THRESHOLDS.temperature.normalMaxRise} &lt; rise ≤ {RISK_THRESHOLDS.temperature.warningMaxRise}°C</td><td>Rise &gt; {RISK_THRESHOLDS.temperature.warningMaxRise}°C</td><td>—</td></tr>
               </tbody>
             </table>
           </div>
           <ol className="mt-5 grid gap-3 text-sm md:grid-cols-4">
             {[
               ["Sense", "Optical (PPG) sensor shines red and infrared light into the skin to read SpO2 and perfusion; a thermistor reads skin temperature."],
-              ["Score", `Each reading gets points (SpO2 0–3, perfusion 0–3, temperature deviation 0–2). Temperature is compared with the ${TEMP_BASELINE}°C baseline, and the points add up to a 0–8 score every second.`],
+              ["Score", `Each reading gets points (SpO2 0–3, perfusion 0–3, temperature rise 0–2). Only increases above the ${TEMP_BASELINE}°C baseline add temperature points; lower readings count as zero rise. The points add up to a 0–8 score every second.`],
               ["Classify", "The total is mapped to Low, Moderate or High."],
               ["Alert", "Moderate and High send a notification to the care team; every reading is saved to history."],
             ].map(([h, d], i) => (
