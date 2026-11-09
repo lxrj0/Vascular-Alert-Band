@@ -38,11 +38,11 @@ export const scorePi = (v: number) => {
   return v >= t.normalMin ? 0 : v >= t.warningMin ? 1 : v >= t.highMin ? 2 : 3;
 };
 export const temperatureRisk = (temp: number) => {
-  const deviation = Math.abs(temp - TEMP_BASELINE);
+  const rise = Math.max(0, temp - TEMP_BASELINE);
   const t = RISK_THRESHOLDS.temperature;
-  const points = deviation <= t.normalMaxDeviation ? 0 : deviation <= t.warningMaxDeviation ? 1 : 2;
+  const points = rise <= t.normalMaxDeviation ? 0 : rise <= t.warningMaxDeviation ? 1 : 2;
   return {
-    deviation,
+    rise,
     points,
     label: points === 0 ? "Normal" : points === 1 ? "Warning" : "High risk",
     tone: points === 0 ? "success" : points === 1 ? "warning" : "destructive",
