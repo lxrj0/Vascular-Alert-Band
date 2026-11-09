@@ -71,7 +71,7 @@ function Dashboard() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [toast, setToast] = useState<Alert | null>(null);
   const [mode, setMode] = useState<"normal" | "moderate" | "high">("normal");
-  const cur = useRef({ spo2: 97, pi: 2.5, temp: 33.5, hr: 76 });
+  const cur = useRef({ spo2: 97, pi: 2.5, temp: 37.2, hr: 76 });
   const lastLevel = useRef<Level>("Low");
   const tick = useRef(0);
 
@@ -79,14 +79,14 @@ function Dashboard() {
     const id = setInterval(() => {
       const c = cur.current;
       const target =
-        mode === "high" ? { spo2: 82, pi: 0.2, temp: 29, hr: 112 }
-        : mode === "moderate" ? { spo2: 91, pi: 0.6, temp: 31, hr: 92 }
-        : { spo2: 97, pi: 2.5, temp: 33.5, hr: 76 };
+        mode === "high" ? { spo2: 82, pi: 0.2, temp: 35.5, hr: 112 }
+        : mode === "moderate" ? { spo2: 91, pi: 0.6, temp: 36.2, hr: 92 }
+        : { spo2: 97, pi: 2.5, temp: 37.2, hr: 76 };
       c.spo2 = clamp(c.spo2 + (target.spo2 - c.spo2) * 0.15 + (Math.random() - 0.5) * 1, 70, 100);
       c.pi = clamp(c.pi + (target.pi - c.pi) * 0.15 + (Math.random() - 0.5) * 0.15, 0.05, 5);
-      c.temp = clamp(c.temp + (target.temp - c.temp) * 0.12 + (Math.random() - 0.5) * 0.15, 25, 37);
+      c.temp = clamp(c.temp + (target.temp - c.temp) * 0.12 + (Math.random() - 0.5) * 0.15, 30, 40);
       c.hr = clamp(c.hr + (target.hr - c.hr) * 0.15 + (Math.random() - 0.5) * 3, 40, 160);
-      const score = scoreSpo2(c.spo2) + scorePi(c.pi) + scoreTemp(c.temp);
+      const score = calculateRiskScore(c);
       const r: Reading = { t: now(), spo2: +c.spo2.toFixed(1), pi: +c.pi.toFixed(2), temp: +c.temp.toFixed(1), hr: Math.round(c.hr), score };
       setData((d) => [...d.slice(-119), r]);
       if (tick.current++ % 5 === 0) setLog((l) => [r, ...l].slice(0, 200));
