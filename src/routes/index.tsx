@@ -110,9 +110,10 @@ function Dashboard() {
     return () => clearTimeout(t);
   }, [toast]);
 
-  const last = data[data.length - 1] ?? { spo2: 97, pi: 2.5, temp: 33.5, hr: 76, score: 0, t: "" };
+  const last = data[data.length - 1] ?? { spo2: 97, pi: 2.5, temp: 37.2, hr: 76, score: 0, t: "" };
   const level = levelOf(last.score);
   const tn = tone(level);
+  const tempStatus = temperatureRisk(last.temp);
 
   return (
     <div className="relative min-h-screen overflow-x-clip bg-background font-sans text-foreground">
@@ -194,17 +195,27 @@ function Dashboard() {
           </div>
           <Sensor label="SpO2" unit="%" value={last.spo2} pts={scoreSpo2(last.spo2)} max={3} color="vital-spo2" />
           <Sensor label="Perfusion" unit="%" value={last.pi} pts={scorePi(last.pi)} max={3} color="vital-perf" />
-          <Sensor label="Temperature" unit="°C" value={last.temp} pts={scoreTemp(last.temp)} max={2} color="vital-temp" />
+          <Sensor
+            label="Temperature"
+            unit="°C"
+            value={last.temp}
+            pts={tempStatus.points}
+            max={2}
+            color="vital-temp"
+            status={tempStatus.label}
+            statusTone={tempStatus.tone}
+            detail={`Δ ${tempStatus.deviation.toFixed(1)}°C from ${TEMP_BASELINE}°C baseline`}
+          />
         </section>
 
         {/* Trends */}
         <section className="rounded-2xl border border-border bg-card p-5">
           <h2 className="mb-3 text-sm font-semibold">Trends · last 2 min</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            <Chart title="Risk Score (0–8)" data={data} k="score" colors={["var(--warning)", "var(--destructive)"]} domain={[0, 8]} refs={[3, 7]} />
+            <Chart title="Risk Score (0–8)" data={data} k="score" colors={["var(--warning)", "var(--destructive)"]} domain={[0, 8]} refs={[RISK_THRESHOLDS.levels.moderateMin, RISK_THRESHOLDS.levels.highMin]} />
             <Chart title="SpO2 (%)" data={data} k="spo2" colors={["var(--primary)", "var(--vital-spo2)"]} domain={[70, 100]} />
             <Chart title="Perfusion Index (%)" data={data} k="pi" colors={["var(--success)", "var(--vital-perf)"]} domain={[0, 5]} />
-            <Chart title="Temperature (°C)" data={data} k="temp" colors={["var(--chart-3)", "var(--vital-temp)"]} domain={[25, 37]} />
+            <Chart title="Temperature (°C)" data={data} k="temp" colors={["var(--chart-3)", "var(--vital-temp)"]} domain={[34, 39]} />
           </div>
         </section>
 
@@ -275,16 +286,16 @@ function Dashboard() {
                 <tr><th className="py-2">Sensor</th><th>0 pts</th><th>1 pt</th><th>2 pts</th><th>3 pts</th></tr>
               </thead>
               <tbody className="font-mono">
-                <tr className="border-t border-border"><td className="py-2 font-sans">SpO2</td><td>≥95%</td><td>90–94</td><td>85–89</td><td>&lt;85</td></tr>
-                <tr className="border-t border-border"><td className="py-2 font-sans">Perfusion index</td><td>≥1.0%</td><td>0.5–0.99</td><td>0.3–0.49</td><td>&lt;0.3</td></tr>
-                <tr className="border-t border-border"><td className="py-2 font-sans">Skin temperature</td><td>≥32°C</td><td>30–31.9</td><td>&lt;30</td><td>—</td></tr>
+                <tr className="border-t border-border"><td className="py-2 font-sans">SpO2</td><td>≥{RISK_THRESHOLDS.spo2.normalMin}%</td><td>{RISK_THRESHOLDS.spo2.warningMin}–{RISK_THRESHOLDS.spo2.normalMin - 1}</td><td>{RISK_THRESHOLDS.spo2.highMin}–{RISK_THRESHOLDS.spo2.warningMin - 1}</td><td>&lt;{RISK_THRESHOLDS.spo2.highMin}</td></tr>
+                <tr className="border-t border-border"><td className="py-2 font-sans">Perfusion index</td><td>≥{RISK_THRESHOLDS.perfusion.normalMin.toFixed(1)}%</td><td>{RISK_THRESHOLDS.perfusion.warningMin}–0.99</td><td>{RISK_THRESHOLDS.perfusion.highMin}–0.49</td><td>&lt;{RISK_THRESHOLDS.perfusion.highMin}</td></tr>
+                <tr className="border-t border-border"><td className="py-2 font-sans">Temperature deviation</td><td>Δ ≤ {RISK_THRESHOLDS.temperature.normalMaxDeviation}°C</td><td>{RISK_THRESHOLDS.temperature.normalMaxDeviation} &lt; Δ ≤ {RISK_THRESHOLDS.temperature.warningMaxDeviation}°C</td><td>Δ &gt; {RISK_THRESHOLDS.temperature.warningMaxDeviation}°C</td><td>—</td></tr>
               </tbody>
             </table>
           </div>
           <ol className="mt-5 grid gap-3 text-sm md:grid-cols-4">
             {[
               ["Sense", "Optical (PPG) sensor shines red and infrared light into the skin to read SpO2 and perfusion; a thermistor reads skin temperature."],
-              ["Score", "Each reading gets points (SpO2 0–3, perfusion 0–3, temperature 0–2). Points add up to a 0–8 score every second."],
+              ["Score", `Each reading gets points (SpO2 0–3, perfusion 0–3, temperature deviation 0–2). Temperature is compared with the ${TEMP_BASELINE}°C baseline, and the points add up to a 0–8 score every second.`],
               ["Classify", "The total is mapped to Low, Moderate or High."],
               ["Alert", "Moderate and High send a notification to the care team; every reading is saved to history."],
             ].map(([h, d], i) => (
@@ -309,13 +320,16 @@ function Vital({ label, value, unit, color }: { label: string; value: string; un
   );
 }
 
-function Sensor({ label, unit, value, pts, max, color }: { label: string; unit: string; value: number; pts: number; max: number; color: string }) {
-  const l = pts === 0 ? "success" : pts === max ? "destructive" : "warning";
+function Sensor({ label, unit, value, pts, max, color, status, statusTone, detail }: { label: string; unit: string; value: number; pts: number; max: number; color: string; status?: string; statusTone?: string; detail?: string }) {
+  const l = statusTone ?? (pts === 0 ? "success" : pts === max ? "destructive" : "warning");
   return (
     <div className="rounded-2xl border border-border border-t-2 bg-card p-5" style={{ borderTopColor: `var(--${color})` }}>
       <p className="text-xs uppercase tracking-widest text-muted-foreground">{label}</p>
       <p className="mt-3 font-mono text-3xl font-semibold" style={{ color: `var(--${color})` }}>{value}<span className="ml-1 text-base text-muted-foreground">{unit}</span></p>
-      <p className={`mt-3 inline-block rounded-full px-2 py-0.5 text-xs font-semibold bg-${l}/15 text-${l}`}>+{pts} / {max} pts</p>
+      <p className={`mt-3 inline-block rounded-full px-2 py-0.5 text-xs font-semibold bg-${l}/15 text-${l}`}>
+        {status ? `${status} · ` : ""}+{pts} / {max} pts
+      </p>
+      {detail && <p className="mt-2 text-xs text-muted-foreground">{detail}</p>}
     </div>
   );
 }
