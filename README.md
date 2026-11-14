@@ -2,7 +2,7 @@
 
 **Smart Monitoring for Early Detection of Acute Compartment Syndrome (ACS)**
 
-🔗 **Live Demo:** [sleeve-alert-buddy.lovable.app](https://sleeve-alert-buddy.lovable.app)
+🔗 **Live Demo:** [Open dashboard](https://lovable.dev/preview/4jBZAMtXRjK2Xvl3Kq9cPHMeBX9JjJyO)
 
 > ⚠️ **Disclaimer:** This is a prototype for educational purposes only. It is not a certified medical device and must not be used for clinical decisions.
 
