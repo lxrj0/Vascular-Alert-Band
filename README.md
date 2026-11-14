@@ -1,64 +1,96 @@
-Smart Vascular Alert 🩺
+# Smart Vascular Alert Band
 
-Smart Monitoring for Early Detection of Acute Compartment Syndrome (ACS)
+**Smart Monitoring for Early Detection of Acute Compartment Syndrome (ACS)**
 
-Overview
+🔗 **Live Demo:** [Open dashboard](https://lovable.dev/preview/4jBZAMtXRjK2Xvl3Kq9cPHMeBX9JjJyO)
+
+> ⚠️ **Disclaimer:** This is a prototype for educational purposes only. It is not a certified medical device and must not be used for clinical decisions.
+
+## Overview
 
 Smart Vascular Alert is a healthcare technology prototype designed to support early risk identification of Acute Compartment Syndrome (ACS) in patients with tibial shaft fractures.
 
-The system monitors selected physiological indicators and analyzes changes to provide visual risk classification and alerts.
+The system monitors selected physiological indicators, analyzes changes, and provides visual risk classification and alerts.
 
-The Problem
+## The Problem
 
 Acute Compartment Syndrome is a serious orthopedic emergency. Delayed recognition can lead to severe complications, including permanent tissue damage.
 
-Our Solution
+## Our Solution
 
-A smart monitoring system that combines sensor-based data collection, risk assessment, and a visual dashboard to support clinical awareness.
+A smart sleeve concept that combines sensor-based data collection, risk assessment, and a visual dashboard to support clinical awareness.
 
-Monitored Parameters
+## Monitored Parameters
 
-* Oxygen Saturation (SpO₂)
-* Perfusion
-* Temperature
-* Movement
+- **Oxygen Saturation (SpO₂)**
+- **Perfusion**
+- **Temperature**
 
-Risk Classification
+## Features
 
-Risk Level	Score	Indicator
-Low	0–2	Green
-Moderate	3–5	Yellow
-High	6–8	Red
+- Real-time risk status for each parameter (Normal / Warning / High risk)
+- Overall patient risk indicator
+- Visual alerts when thresholds are crossed
+- Clean dashboard designed for quick reading
 
-System Architecture
+## How It Works
 
-Sensor → API → Database → Risk Assessment Algorithm → Dashboard → Alert
+Each parameter is compared against defined thresholds, and the results are combined into an overall risk classification.
 
-Key Features
+### Temperature
 
-* Physiological parameter monitoring
-* Baseline-based data comparison
-* Risk scoring and classification
-* Visual monitoring dashboard
-* Alert notification system
+Baseline: **37.5°C**. Only a **rise** above the baseline is counted.
 
-Live Demo
+| Rise above baseline | Risk level |
+|---|---|
+| ≤ 0.5°C | Normal |
+| ≤ 1.5°C | Warning |
+| > 1.5°C | High risk |
 
-Try Smart Vascular Alert
+### Perfusion
 
-Development Platform
+Based on Perfusion Index (PI). Lower values indicate reduced blood flow.
 
-* Lovable
-* GitHub
+| Perfusion | Risk level |
+|---|---|
+| (add thresholds from the code) | Normal |
+| (add thresholds from the code) | Warning |
+| (add thresholds from the code) | High risk |
 
-Project Status
+### SpO₂
 
-Prototype / Minimum Viable Product (MVP)
+| SpO₂ | Risk level |
+|---|---|
+| (add thresholds from the code) | Normal |
+| (add thresholds from the code) | Warning |
+| (add thresholds from the code) | High risk |
 
-Clinical Disclaimer
+## Screenshots
 
-This project is an educational prototype and has not been clinically validated. It is not intended to replace professional clinical assessment or medical decision-making.
+_Add dashboard screenshots here (Normal, Warning, High risk)._
 
-Team
+## Future Work
 
-Smart Vascular Alert Team
+- Integration with real sensors (e.g., pulse oximetry and temperature sensors)
+- Mobile notifications for clinicians
+- Trend analysis over time
+- Clinical validation
+
+## Tech Stack
+
+- Built with [Lovable](https://lovable.dev)
+- React + TypeScript
+- Hosted via Lovable, synced with GitHub
+
+## Development
+
+```bash
+git clone <this-repository-url>
+cd <repository-name>
+npm i
+npm run dev
+```
+
+## Team
+
+**Methodon**
